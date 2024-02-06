@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typeahead</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #results {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #results li {
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        #results li:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="text" id="typeahead" autocomplete="off">
+    <ul id="results"></ul>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            const inputField = $('#typeahead');
+            const resultsList = $('#results');
+
+            inputField.on('input', function () {
+                const query = $(this).val();
+                $.get('/states', { q: query }, function (states) {
+                    resultsList.empty();
+                    states.forEach(state => {
+                        const listItem = $('<li>').text(state);
+                        resultsList.append(listItem);
+                    });
+                });
+            });
+
+            inputField.on('keydown', function (e) {
+                const results = resultsList.children();
+                let selected = results.filter('.selected');
+
+                if (e.keyCode === 38) { // Up arrow
+                    if (selected.length) {
+                        selected.removeClass('selected');
+                        selected = selected.prev();
+                    }
+                    if (!selected.length) {
+                        selected = results.last();
+                    }
+                    selected.addClass('selected');
+                } else if (e.keyCode === 40) { // Down arrow
+                    if (selected.length) {
+                        selected.removeClass('selected');
+                        selected = selected.next();
+                    }
+                    if (!selected.length) {
+                        selected = results.first();
+                    }
+                    selected.addClass('selected');
+                } else if (e.keyCode === 13) { // Enter key
+                    if (selected.length) {
+                        inputField.val(selected.text());
+                        resultsList.empty();
+                    }
+                }
+            });
+
+            resultsList.on('click', 'li', function () {
+                inputField.val($(this).text());
+                resultsList.empty();
+            });
+        });
+    </script>
+</body>
+
+</html>
