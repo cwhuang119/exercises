@@ -75,6 +75,20 @@
                         resultsList.empty();
                     }
                 }
+
+                // Scroll the results list to keep the selected item in view
+                if (selected.length) {
+                    const listTop = resultsList.scrollTop();
+                    const listBottom = listTop + resultsList.height();
+                    const top = selected.position().top + resultsList.scrollTop();
+                    const bottom = top + selected.outerHeight();
+
+                    if (bottom > listBottom) {
+                        resultsList.scrollTop(bottom - resultsList.height());
+                    } else if (top < listTop) {
+                        resultsList.scrollTop(top);
+                    }
+                }
             });
 
             resultsList.on('click', 'li', function () {
